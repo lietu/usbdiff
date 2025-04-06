@@ -2,6 +2,8 @@
 
 Monitors for changes in your USB devices, disconnects and connects, and shows them in a convenient output format.
 
+For a graphical version check out [usbdiff-gui](https://github.com/lietu/usbdiff-gui).
+
 Depends on `lsusb`, `diff`, and `bash`, this means it likely only supports Linux.
 
 Once you clone this repository or otherwise download the `usbdiff` -script, you should be able to run it.
