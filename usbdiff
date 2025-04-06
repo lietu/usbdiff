@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+LSUSB=$(which lsusb)
+DIFF=$(which diff)
+
+get_usb_devices() {
+  "$LSUSB"
+}
+
+LAST_DEVICES=$(get_usb_devices)
+
+# Show currently connected devices at the start
+echo "${LAST_DEVICES}"
+
+# Monitor for changes
+while true; do
+  DEVICES=$(get_usb_devices)
+  DEVICES_DIFF=$("$DIFF" \
+    --color=always \
+    <(echo "${LAST_DEVICES}") \
+    <(echo "${DEVICES}") \
+    | tail -n+2)
+
+  # Something has changed
+  if [[ -n "${DEVICES_DIFF}" ]]; then
+    NOW=$(date "+%Y-%m-%d %H:%M:%S")
+    while IFS= read -r LINE; do
+      echo "${NOW} ${LINE}"
+    done <<< "${DEVICES_DIFF}"
+  fi
+
+  # Wait a bit and then check for more changes
+  LAST_DEVICES="${DEVICES}"
+  sleep 0.25
+done
