@@ -3,10 +3,33 @@
 LSUSB=$(which lsusb)
 DIFF=$(which diff)
 
+PAD=90
+DELAY=0.25
+
+
 get_usb_devices() {
-  "$LSUSB"
+    # Run lsusb and loop through each line
+    while IFS= read -r line; do
+	# Find device speed for this specific device
+        bus=$(echo "$line" | cut -d' ' -f2)
+        dev=$(echo "$line" | tr ':' ' ' | cut -d' ' -f4)
+        speed_line=$(lsusb -D "/dev/bus/usb/${bus}/${dev}" 2>/dev/null | grep "^Negotiated speed")
+        speed="${speed_line:18}"
+
+        # Move the more useful bitrate to the left side of the string
+        # Full Speed (12Mbps) -> 12Mbps (Full Speed)
+        speed=$(echo "$speed" | sed -Ee 's@^(.+) \((.+)\)$@\2 (\1)@g')
+
+        # Separate bitrate and name
+        speed_rate=$(echo "$speed" | cut -d' ' -f1)
+        speed_name=$(echo "$speed" | cut -d' ' -f2-)
+
+        # Print all with reasonable padding
+        printf "%-${PAD}s %-8s %s\n" "$line" "$speed_rate" "$speed_name"
+    done <<< "$($LSUSB)"
 }
 
+# Figure out currently connected devices
 LAST_DEVICES=$(get_usb_devices)
 
 # Show currently connected devices at the start
@@ -31,5 +54,5 @@ while true; do
 
   # Wait a bit and then check for more changes
   LAST_DEVICES="${DEVICES}"
-  sleep 0.25
+  sleep "$DELAY"
 done
