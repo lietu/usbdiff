@@ -11,6 +11,7 @@ Once you clone this repository or otherwise download the `usbdiff` -script, you 
 Usage:
 
 ```bash
+chmod +x usbdiff
 ./usbdiff
 ```
 
